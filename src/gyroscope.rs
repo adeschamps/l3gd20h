@@ -48,7 +48,15 @@ impl<Dev> Gyroscope<Dev>
           Error: From<Dev::Error>
 {
     /// Initialize the gyroscope from an I2C device.
-    pub fn from_i2c_device(device: Dev) -> Result<Gyroscope<Dev>> {
+    pub fn from_i2c_device(mut device: Dev) -> Result<Gyroscope<Dev>> {
+        use registers::{CTRL_1, PD};
+
+        // Set power mode to on
+        let bits = device.smbus_read_byte_data(CTRL_1)?;
+        let mut ctrl1 = registers::Ctrl1::from_bits_truncate(bits);
+        ctrl1.insert(PD);
+        device.smbus_write_byte_data(CTRL_1, ctrl1.bits())?;
+
         let range = MeasurementRange::Dps245;
         let gyroscope = Gyroscope { device, range };
         Ok(gyroscope)
