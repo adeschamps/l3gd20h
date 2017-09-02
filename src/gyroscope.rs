@@ -66,13 +66,10 @@ impl<Dev> Gyroscope<Dev>
     ///
     /// Returns a tuple of (x, y, z) rotational velocities in degrees per second.
     pub fn read_rotation(&mut self) -> Result<(f32, f32, f32)> {
-        use byteorder::{LittleEndian, ReadBytesExt};
-        use std::io::Cursor;
+        use byteorder::{LittleEndian, ByteOrder};
 
         let data = self.device
             .smbus_read_i2c_block_data(registers::OUT_X_L, 6)?;
-
-        let mut cursor = Cursor::new(&data);
 
         // Scale of a unit, in degrees per second.
         // Refer to Table 3 of the datasheet.
@@ -83,9 +80,9 @@ impl<Dev> Gyroscope<Dev>
                         MeasurementRange::Dps2000 => 70.00,
                     };
 
-        let x = cursor.read_i16::<LittleEndian>()? as f32 * scale;
-        let y = cursor.read_i16::<LittleEndian>()? as f32 * scale;
-        let z = cursor.read_i16::<LittleEndian>()? as f32 * scale;
+        let x = LittleEndian::read_i16(&data[0..2]) as f32 * scale;
+        let y = LittleEndian::read_i16(&data[2..4]) as f32 * scale;
+        let z = LittleEndian::read_i16(&data[4..6]) as f32 * scale;
 
         let out = (x, y, z);
         Ok(out)
