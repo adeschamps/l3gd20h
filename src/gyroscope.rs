@@ -19,6 +19,18 @@ pub struct Gyroscope<Dev>
 }
 
 
+/// The output type of the gyroscope.
+#[derive(Debug, PartialEq, PartialOrd)]
+pub struct DegreesPerSecond {
+    /// Degrees per second around the x axis.
+    pub x: f32,
+    /// Degrees per second around the y axis.
+    pub y: f32,
+    /// Degrees per second around the z axis.
+    pub z: f32,
+}
+
+
 /// Settings for the measurement range of the gyroscope.
 pub enum MeasurementRange {
     /// +/- 245 degrees per second
@@ -65,7 +77,7 @@ impl<Dev> Gyroscope<Dev>
     /// Read the gyroscope.
     ///
     /// Returns a tuple of (x, y, z) rotational velocities in degrees per second.
-    pub fn read_rotation(&mut self) -> Result<(f32, f32, f32)> {
+    pub fn read_rotation(&mut self) -> Result<DegreesPerSecond> {
         use byteorder::{LittleEndian, ByteOrder};
 
         let data = self.device
@@ -84,7 +96,7 @@ impl<Dev> Gyroscope<Dev>
         let y = LittleEndian::read_i16(&data[2..4]) as f32 * scale;
         let z = LittleEndian::read_i16(&data[4..6]) as f32 * scale;
 
-        let out = (x, y, z);
+        let out = DegreesPerSecond { x, y, z };
         Ok(out)
     }
 
