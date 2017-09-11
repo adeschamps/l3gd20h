@@ -61,12 +61,12 @@ impl<Dev> Gyroscope<Dev>
 {
     /// Initialize the gyroscope from an I2C device.
     pub fn from_i2c_device(mut device: Dev) -> Result<Gyroscope<Dev>> {
-        use registers::{CTRL_1, PD};
+        use registers::{Ctrl1, CTRL_1};
 
         // Set power mode to on
         let bits = device.smbus_read_byte_data(CTRL_1)?;
         let mut ctrl1 = registers::Ctrl1::from_bits_truncate(bits);
-        ctrl1.insert(PD);
+        ctrl1.insert(Ctrl1::PD);
         device.smbus_write_byte_data(CTRL_1, ctrl1.bits())?;
 
         let range = MeasurementRange::Dps245;
@@ -102,16 +102,16 @@ impl<Dev> Gyroscope<Dev>
 
     /// Set the measurement range.
     pub fn set_range(&mut self, range: MeasurementRange) -> Result<()> {
-        use registers::{Ctrl4, CTRL_4, FS1, FS0};
+        use registers::{Ctrl4, CTRL_4};
 
         let bits = self.device.smbus_read_byte_data(CTRL_4)?;
         let mut flags = Ctrl4::from_bits_truncate(bits);
 
-        flags.remove(FS1 | FS0);
+        flags.remove(Ctrl4::FS1 | Ctrl4::FS0);
         let setting = match range {
             MeasurementRange::Dps245 => Ctrl4::empty(),
-            MeasurementRange::Dps500 => FS0,
-            MeasurementRange::Dps2000 => FS1,
+            MeasurementRange::Dps500 => Ctrl4::FS0,
+            MeasurementRange::Dps2000 => Ctrl4::FS1,
         };
         flags.insert(setting);
 
