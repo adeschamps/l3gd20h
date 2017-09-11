@@ -8,10 +8,10 @@ license = "MIT/Apache-2.0"
 readme = "README.md"
 
 [dependencies]
-bitflags = "*"
-byteorder = "*"
-error-chain = "*"
-i2cdev = "*"
+bitflags = "1.0"
+byteorder = "1.1"
+error-chain = "0.11"
+i2cdev = "0.3"
 
 [badges]
 travis-ci = { repository = "adeschamps/l3gd20h" }
